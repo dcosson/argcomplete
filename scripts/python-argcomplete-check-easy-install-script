@@ -20,11 +20,11 @@ with open(args.wrapper_script) as fh:
     for line in lines.split("\n", 10):
         if line.startswith("# EASY-INSTALL-SCRIPT") or line.startswith("# EASY-INSTALL-DEV-SCRIPT"):
             wt, dist, script = re.match("# EASY-INSTALL-(SCRIPT|DEV-SCRIPT): '(.+)','(.+)'", line).groups()
-            if sys.platform == 'darwin':
-                script_relative_path = '../scripts/' + script
-            else:
-                script_relative_path = 'scripts/' + script
-            if "PYTHON_ARGCOMPLETE_OK" in pkg_resources.get_distribution(dist).get_metadata(script_relative_path):
+            try:
+                script_metadata = pkg_resources.get_distribution(dist).get_metadata('scripts/' + script)
+            except IOError:
+                script_metadata = pkg_resources.get_distribution(dist).get_metadata('../scripts/' + script)
+            if "PYTHON_ARGCOMPLETE_OK" in script_metadata:
                 exit(0)
         elif line.startswith("# EASY-INSTALL-ENTRY-SCRIPT"):
             dist, group, name = re.match("# EASY-INSTALL-ENTRY-SCRIPT: '(.+)','(.+)','(.+)'", line).groups()
